@@ -208,63 +208,63 @@ if __name__ == "__main__":
     
 
     
-args = get_args_parser().parse_args()   
-
-openai.api_key = args.openai_key
-openai.api_base = "xxxx"
-openai.api_type = ""
-openai.api_version = ""
-
-template = '''[readme]:{content}
-[instruction]:{extend_instructions}
-
-[System]
-You are given [readme], you need to carefully see [readme] and choose wirte code or script to implement my [instruction]. 
-Please output code or script directly, use markdown to output code without any explanation .'''
-final = {}
-
-with open(args.input_file, "r") as fp:
-    # data = json.load(fp)
-    for line in fp:
-        item = json.loads(line)
-        data.append(item)
-
-    id = 0
-    messages = []
-    print("Processing the data.")
-    for line in tqdm(data):
-        
-        
-        start_template = template.format(content=line[f'{args.readme_type}'], 
-                             extend_instructions=line[f'{args.instruction}']
-                             )
-        
-        
-        messages.append([{"role": "user", "content": start_template}])
-        
-
-
+    args = get_args_parser().parse_args()   
+    
+    openai.api_key = args.openai_key
+    openai.api_base = "xxxx"
+    openai.api_type = ""
+    openai.api_version = ""
+    
+    template = '''[readme]:{content}
+    [instruction]:{extend_instructions}
+    
+    [System]
+    You are given [readme], you need to carefully see [readme] and choose wirte code or script to implement my [instruction]. 
+    Please output code or script directly, use markdown to output code without any explanation .'''
+    final = {}
+    
+    with open(args.input_file, "r") as fp:
+        # data = json.load(fp)
+        for line in fp:
+            item = json.loads(line)
+            data.append(item)
+    
+        id = 0
+        messages = []
+        print("Processing the data.")
+        for line in tqdm(data):
             
-    responses = asyncio.run(generate_from_openai_chat_completion(
-        api_key=args.openai_key,
-        messages=messages, #240
-        engine_name=args.engine,
-        temperature=1.0,
-        top_p=1.0,
-        n=args.nturn
-    ))
-
-    output_data = []
+            
+            start_template = template.format(content=line[f'{args.readme_type}'], 
+                                 extend_instructions=line[f'{args.instruction}']
+                                 )
+            
+            
+            messages.append([{"role": "user", "content": start_template}])
+            
     
-    for index in range(len(responses)):
-        output_data.append({
-            "github_id": data[index]["github_id"],
-            "id": int(data[index]["id"]),
-            "output": responses[index],
-        })
-        
     
-    with open(args.answer_file, "w") as fp:
-        json.dump(output_data, fp)
+                
+        responses = asyncio.run(generate_from_openai_chat_completion(
+            api_key=args.openai_key,
+            messages=messages, #240
+            engine_name=args.engine,
+            temperature=1.0,
+            top_p=1.0,
+            n=args.nturn
+        ))
+    
+        output_data = []
         
-parsing(args)
+        for index in range(len(responses)):
+            output_data.append({
+                "github_id": data[index]["github_id"],
+                "id": int(data[index]["id"]),
+                "output": responses[index],
+            })
+            
+    
+        with open(args.answer_file, "w") as fp:
+            json.dump(output_data, fp)
+            
+    parsing(args)
